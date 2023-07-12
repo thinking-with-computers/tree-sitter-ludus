@@ -1,5 +1,7 @@
-false
+(1, ...two)
 
-nil; true
+${three, :four}
 
-0
+#{:a 5, :b 6, ...seven}
+
+@{:a 8, nine}
