@@ -27,16 +27,20 @@
 
 (number) @number
 
+; Names
+
 [
 	(identifier)
 	(name)
 ] @variable
 
+; Constants
+
 [
 	(true)
 	(false)
 	(nil)
-] @builtin
+] @constant.builtin
 
 (comment) @comment
 

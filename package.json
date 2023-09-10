@@ -17,8 +17,9 @@
   "tree-sitter": [
     {
       "scope": "source.ludus",
-      "file-types": [".ld", ".ludus"],
-      "injection-regex": "ludus"
+      "file-types": ["ld", "ludus"],
+      "injection-regex": "ludus",
+      "highlights": ["queries/highlights.scm"]
     }
   ]
 }
