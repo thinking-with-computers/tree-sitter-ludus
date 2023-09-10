@@ -18,6 +18,7 @@
     {
       "scope": "source.ludus",
       "file-types": [".ld", ".ludus"],
+      "injection-regex": "ludus"
     }
   ]
 }
