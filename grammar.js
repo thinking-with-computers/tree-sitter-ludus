@@ -1,29 +1,218 @@
 module.exports = grammar({
   name: 'Ludus',
   
-  word: $ => $.name,
+  word: $ => $.identifier,
+
+  extras: $ => [
+    $._whitespace,
+    $.comment,
+  ],
   
   rules: {
     source_file: $ => seq(
       optional($._terminator),
-      repeat($._line),
-      $.expression,
+      repeat($._source_line),
+      $._toplevel,
       optional($._terminator),
     ),
 
-    _line: $ => seq($.expression, $._terminator),
+    comment: $ => /\&[^\n]*/,
+
+    _whitespace: $ => token(/\s/),
+
+    _source_line: $ => seq($._toplevel, $._terminator),
  
     _terminator: $ => repeat1(choice(
       "\n",
       ";",
     )),
 
+    _toplevel: $ => choice(
+      $.expression,
+      $.import,
+      $.ns,
+    ),
+
+    import: $ => seq("import", $.string, "as", $.name),
+
     expression: $ => choice(
       $.literal,
-      $.name,
       $.if,
       $._collection,
+      $.synthetic,
+      $.loop,
+      $.let,
+      $.when,
+      $.spawn,
+      $.receive,
+      $.block,
+      $.do,
+      $.ref,
+      $.fn,
+      $.recur,
     ),
+
+    let: $ => seq("let", $.pattern, "=", $.expression),
+
+    spawn: $ => seq("spawn", $.expression),
+
+    pattern: $ => choice(
+      $.name,
+      $.literal,
+      $.tuple_pattern,
+      $.list_pattern,
+      $.dict_pattern,
+      $.struct_pattern,
+      $.placeholder,
+    ),
+
+    when: $ => choice($.cond, $.match),
+
+    cond_lhs: $ => choice($.expression, "else", $.placeholder),
+
+    cond_clause: $ => seq($.cond_lhs, "->", $.expression),
+
+    _cond_entry: $ => seq($.cond_clause, $._terminator),
+
+    cond: $ => seq(
+      "when",
+      "{",
+      optional($._terminator),
+      repeat($._cond_entry),
+      $.cond_clause,
+      optional($._terminator),
+      "}",
+    ),
+
+    match_lhs: $ => choice($.pattern, "else"),
+
+    match_clause: $ => seq($.match_lhs, "->", $.expression),
+
+    _match_entry: $ => seq($.match_clause, $._terminator),
+
+    match: $ => seq(
+      "when",
+      $.expression,
+      "is",
+      "{",
+      optional($._terminator),
+      repeat($._match_entry),
+      $.match_clause,
+      optional($._terminator),
+      "}"
+    ),
+
+    receive: $ => seq(
+      "receive",
+      "{",
+      optional($._terminator),
+      repeat($._match_entry),
+      $.match_clause,
+      optional($._terminator),     
+      "}",
+    ),
+
+    _linear_pattern_entry: $ => prec.left(1, seq($.pattern, $._separator)),
+
+    tuple_pattern: $ => seq(
+      "(",
+      optional($._separator),
+      repeat($._linear_pattern_entry),
+      optional(choice($.pattern, $.splat)), // splats only go at the end
+      optional($._separator), 
+      ")",
+    ),
+
+    list_pattern: $ => seq(
+      "[",
+      optional($._separator),
+      repeat($._linear_pattern_entry),
+      optional(choice($.pattern, $.splat)), // splats only go at the end
+      optional($._separator),
+      "]",
+    ),
+
+    assoc_pattern: $ => choice(
+      $.name,
+      seq($.keyword, $.pattern),
+    ),
+
+    _assoc_entry: $ => prec.left(1, seq($.assoc_pattern, $._separator)),
+
+    dict_pattern: $ => seq(
+      "#{",
+      optional($._separator),
+      repeat($._assoc_entry),
+      optional(choice($.assoc_pattern, $.splat)),
+      optional($._separator),
+      "}"
+    ),
+
+    struct_pattern: $ => seq(
+      "@{",
+      optional($._separator),
+      repeat($._assoc_entry),
+      optional(choice($.assoc_pattern, $.splat)),
+      optional($._separator),
+      "}"
+    ),
+
+    fn: $ => choice(
+      $.lambda,
+      $.named, 
+      $.composite
+    ),
+
+    fn_clause: $ => seq($.tuple_pattern, "->", $.expression),
+
+    lambda: $ => seq("fn", $.fn_clause),
+
+    named: $ => seq("fn", $.name, $.fn_clause),
+
+    _fn_entry: $ => seq($.fn_clause, $._terminator),
+
+    composite: $ => seq(
+      "fn", 
+      $.name, 
+      "{",
+      optional($._terminator),
+      optional(seq($.string, $._terminator)),
+      repeat($._fn_entry),
+      $.fn_clause,
+      optional($._terminator),
+      "}",
+    ),
+
+    _block_line: $ => seq($.expression, $._terminator),
+
+    block: $ => seq("{", repeat1($._block_line), "}"),
+
+    ref: $ => seq("ref", $.name, "=", $.expression),
+
+    do: $ => prec.left(1, seq("do", $.expression, repeat1(seq(optional(repeat("\n")), ">", $.expression)))),
+
+    loop: $ => seq(
+      "loop",
+      $.tuple,
+      "with",
+      $.loop_body,
+    ),
+
+    loop_body: $ => choice(
+      $.fn_clause, 
+      $.complex_loop_body
+    ),
+
+    complex_loop_body: $ => seq(      
+      "{",
+      optional($._terminator),
+      repeat($._fn_entry),
+      $.fn_clause,
+      optional($._terminator),
+      "}"
+    ),
+
+    recur: $ => seq("recur", $.tuple),
 
     if: $ => seq(
       "if",
@@ -36,12 +225,37 @@ module.exports = grammar({
       $.expression
     ),
     
-    name: $ => /[a-z][\w\-\!\?]*/,
+    name: $ => choice($.identifier, $.reserved),
+
+    identifier: $ => /[a-z][\w\-\!\?]*/,
+
+    reserved: $ => prec(-1, choice(
+          "fn",
+          "if",
+          "then",
+          "else",
+          "let",
+          "when",
+          "with",
+          "loop",
+          "recur",
+          "do",
+          "spawn",
+          "send",
+          "receive",
+          "ref",
+          "true",
+          "false",
+          "nil",
+          "is",
+          "import",
+          "as",
+          "ns",
+        )),
 
     literal: $ => choice(
       $._atom,
       $.number,
-      $.symbol,
       $.string,
     ),
 
@@ -54,7 +268,8 @@ module.exports = grammar({
     _atom: $ => choice(
       $.true,
       $.false,
-      $.nil
+      $.nil,
+      $.keyword
     ),
 
     true: $ => "true",
@@ -65,7 +280,7 @@ module.exports = grammar({
 
     number: $ => /\-?(([1-9]\d*)|0)(\.\d+)?/,
 
-    symbol: $ => /:[a-z][\w\-\!\?]*/,
+    keyword: $ => /:[a-z][\w\-\!\?]*/,
 
     _collection: $ => choice(
       $.tuple,
@@ -77,34 +292,38 @@ module.exports = grammar({
 
     tuple: $ => seq(
       "(",
-      $._linear_collection,
+      optional($._separator),
+      repeat($._tuple_entry),
+      $.expression,
+      optional($._separator),
       ")",
     ),
 
-    _tuple_term: $ => choice($.expression, $.splat),
-
     splat: $ => seq("...", $.name),
 
-    _tuple_entry: $ => seq($._tuple_term, $._separator),
+    _tuple_entry: $ => seq($.expression, $._separator),
 
-    _separator: $ => repeat1(choice(",", "\n")),
+    _separator: $ => prec.left(1, repeat1(choice(",", "\n"))),
 
-    _linear_collection: $ => seq( 
-      optional($._separator),
-      repeat($._tuple_entry),
-      $._tuple_term,
-      optional($._separator),
-    ),
+    _linear_term: $ => choice($.expression, $.splat),
+
+    _linear_entry: $ => prec.left(1, seq($._linear_term, $._separator)),
 
     list: $ => seq(
       "[",
-      $._linear_collection,
+      optional($._separator),
+      repeat($._linear_entry),
+      optional($._linear_term),
+      optional($._separator),
       "]",
     ),
 
     set: $ => seq(
       "${",
-      $._linear_collection,
+      optional($._separator),
+      repeat($._linear_entry),
+      optional($._linear_term),
+      optional($._separator),
       "}",
     ),
 
@@ -112,7 +331,7 @@ module.exports = grammar({
       "#{",
       optional($._separator),
       repeat($._dict_entry),
-      $._dict_term,
+      optional($._dict_term),
       optional($._separator),
       "}",
     ),
@@ -123,15 +342,24 @@ module.exports = grammar({
       $.splat
     ),
 
-    _dict_entry: $ => seq($._dict_term, $._separator),
+    _dict_entry: $ => prec.left(1, seq($._dict_term, $._separator)),
 
-    assoc: $ => seq($.symbol, $.expression),
+    assoc: $ => seq($.keyword, $.expression),
 
     struct: $ => seq(
       "@{",
       optional($._separator),
       repeat($._struct_entry),
-      $._struct_term,
+      optional($._struct_term),
+      optional($._separator),
+      "}",
+    ),
+
+    ns: $ => seq(
+      "ns", "{",
+      optional($._separator),
+      repeat($._struct_entry),
+      optional($._struct_term),
       optional($._separator),
       "}",
     ),
@@ -141,8 +369,28 @@ module.exports = grammar({
       $.name,
     ),
 
-    _struct_entry: $ => seq($._struct_term, $._separator),
-    
+    _struct_entry: $ => prec.left(1, seq($._struct_term, $._separator)),
+
+    synthetic: $ => prec.left(1, seq($.synth_root, repeat($.synth_term))),
+
+    synth_root: $ => prec.left(1, choice($.name, $.keyword)),
+
+    synth_term: $ => choice($.args, $.keyword),
+
+    placeholder: $ => "_",
+
+    _arg_term: $ => choice($.placeholder, $.expression),
+
+    _arg_entry: $ => prec.left(1, seq($._arg_term, $._separator)),
+
+    args: $ => prec.left(1, seq(
+          "(",
+          repeat($._separator),
+          repeat($._arg_entry),
+          optional($._arg_term),
+          repeat($._separator),
+          ")"
+        ))
     
   }
 });
