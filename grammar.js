@@ -4,7 +4,7 @@ TODO:
 * Add repeat expressions
 x Add guards
 x Add type patterns if they're not here
-* Figure out why this isn't working
+x Figure out why this isn't working
 * Add simple, compound, binding, non-binding scheme
 */
 
