@@ -2,9 +2,10 @@
 TODO:
 * Add use expressions
 * Add repeat expressions
-* Add guards
-* Add type patterns if they're not here
+x Add guards
+x Add type patterns if they're not here
 * Figure out why this isn't working
+* Add simple, compound, binding, non-binding scheme
 */
 
 module.exports = grammar({
@@ -68,6 +69,7 @@ module.exports = grammar({
 
     pattern: $ => choice(
       $.name,
+      $.typed,
       $.literal,
       $.tuple_pattern,
       $.list_pattern,
@@ -75,6 +77,8 @@ module.exports = grammar({
       $.struct_pattern,
       $.placeholder,
     ),
+
+    typed: $ => seq($.name, "as", $.keyword),
 
     when: $ => choice($.cond, $.match),
 
@@ -96,14 +100,16 @@ module.exports = grammar({
 
     match_lhs: $ => choice($.pattern, "else"),
 
-    match_clause: $ => seq($.match_lhs, "->", $.expression),
+    match_clause: $ => seq($.match_lhs, optional($.guard), "->", $.expression),
+
+    guard: $ => seq("if", $.expression),
 
     _match_entry: $ => seq($.match_clause, $._terminator),
 
     match: $ => seq(
-      "when",
+      "match",
       $.expression,
-      "is",
+      "with",
       "{",
       optional($._terminator),
       repeat($._match_entry),
@@ -237,7 +243,7 @@ module.exports = grammar({
     
     name: $ => choice($.identifier, $.reserved),
 
-    identifier: $ => /[a-z][\w\-\!\?]*/,
+    identifier: $ => /[a-z][\w\-\!\?\/_]*/,
 
     reserved: $ => prec(-1, choice(
           "as",
@@ -290,7 +296,7 @@ module.exports = grammar({
 
     number: $ => /\-?(([1-9]\d*)|0)(\.\d+)?/,
 
-    keyword: $ => /:[a-z][\w\-\!\?]*/,
+    keyword: $ => /:[a-z][\d\w\-\!\?]*/,
 
     _collection: $ => choice(
       $.tuple,
@@ -366,7 +372,7 @@ module.exports = grammar({
     ),
 
     ns: $ => seq(
-      "ns", "{",
+      "ns", $.name, "{",
       optional($._separator),
       repeat($._struct_entry),
       optional($._struct_term),
