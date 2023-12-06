@@ -1,3 +1,12 @@
+/*
+TODO:
+* Add use expressions
+* Add repeat expressions
+* Add guards
+* Add type patterns if they're not here
+* Figure out why this isn't working
+*/
+
 module.exports = grammar({
   name: 'ludus',
   
@@ -31,6 +40,7 @@ module.exports = grammar({
       $.expression,
       $.import,
       $.ns,
+
     ),
 
     import: $ => seq("import", $.string, "as", $.name),
