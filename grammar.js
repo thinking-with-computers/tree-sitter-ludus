@@ -54,8 +54,9 @@ module.exports = grammar({
       $.loop,
       $.let,
       $.when,
+      $.match,
+      $.with,
       $.spawn,
-      $.receive,
       $.block,
       $.do,
       $.ref,
@@ -80,15 +81,13 @@ module.exports = grammar({
 
     typed: $ => seq($.name, "as", $.keyword),
 
-    when: $ => choice($.cond, $.match),
-
     cond_lhs: $ => choice($.expression, "else", $.placeholder),
 
     cond_clause: $ => seq($.cond_lhs, "->", $.expression),
 
     _cond_entry: $ => seq($.cond_clause, $._terminator),
 
-    cond: $ => seq(
+    when: $ => seq(
       "when",
       "{",
       optional($._terminator),
@@ -118,15 +117,52 @@ module.exports = grammar({
       "}"
     ),
 
-    receive: $ => seq(
-      "receive",
+    with_clause: $ => seq($.pattern, optional($.guard), "=", $.expression),
+
+    _with_entry: $ => seq($.with_clause, $._terminator),
+
+    with_clauses: $ => seq(
+      "{",
+      optional($._terminator),
+      repeat($._with_entry),
+      $.with_clause,
+      optional($._terminator),
+      "}",
+    ), 
+
+    with: $ => prec.left(1, seq(
+      "with", 
+      choice($.with_clause, $.with_clauses),
+      optional($.with_then)
+    )),
+
+    with_then: $ => prec.left(1, seq(
+      optional(repeat("\n")),
+      "then",
+      $.expression,
+      optional($.with_else)
+    )),
+
+    with_else: $ => seq(
+      optional(repeat("\n")),
+      "else",
       "{",
       optional($._terminator),
       repeat($._match_entry),
       $.match_clause,
-      optional($._terminator),     
-      "}",
+      optional($._terminator),
+      "}"   
     ),
+
+    // receive: $ => seq(
+    //   "receive",
+    //   "{",
+    //   optional($._terminator),
+    //   repeat($._match_entry),
+    //   $.match_clause,
+    //   optional($._terminator),     
+    //   "}",
+    // ),
 
     _linear_pattern_entry: $ => prec.left(1, seq($.pattern, $._separator)),
 
@@ -258,7 +294,7 @@ module.exports = grammar({
           "loop",
           "nil",
           "ns",
-          "receive",
+          //"receive",
           "recur",
           "ref",
           //"send",

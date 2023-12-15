@@ -114,21 +114,6 @@
     }
   },
   {
-    "type": "cond",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "cond_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "cond_clause",
     "named": true,
     "fields": {},
@@ -268,7 +253,7 @@
           "named": true
         },
         {
-          "type": "receive",
+          "type": "match",
           "named": true
         },
         {
@@ -301,6 +286,10 @@
         },
         {
           "type": "when",
+          "named": true
+        },
+        {
+          "type": "with",
           "named": true
         }
       ]
@@ -344,10 +333,6 @@
       "types": [
         {
           "type": "expression",
-          "named": true
-        },
-        {
-          "type": "guard",
           "named": true
         },
         {
@@ -714,21 +699,6 @@
     }
   },
   {
-    "type": "receive",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "match_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "recur",
     "named": true,
     "fields": {},
@@ -1002,15 +972,106 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
-          "type": "cond",
+          "type": "cond_clause",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "with",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "with_clause",
           "named": true
         },
         {
-          "type": "match",
+          "type": "with_clauses",
+          "named": true
+        },
+        {
+          "type": "with_then",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "with_clause",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "guard",
+          "named": true
+        },
+        {
+          "type": "pattern",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "with_clauses",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "with_clause",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "with_else",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "match_clause",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "with_then",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "with_else",
           "named": true
         }
       ]
@@ -1147,10 +1208,6 @@
   {
     "type": "placeholder",
     "named": true
-  },
-  {
-    "type": "receive",
-    "named": false
   },
   {
     "type": "recur",
