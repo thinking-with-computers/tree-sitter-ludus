@@ -40,7 +40,7 @@ module.exports = grammar({
     _toplevel: $ => choice(
       $.expression,
       $.import,
-      $.ns,
+      $.pkg,
 
     ),
 
@@ -55,11 +55,11 @@ module.exports = grammar({
       $.let,
       $.when,
       $.match,
-      $.with,
-      $.spawn,
+      // $.with,
+      // $.spawn,
       $.block,
       $.do,
-      $.ref,
+      $.box,
       $.fn,
       $.recur,
     ),
@@ -75,7 +75,7 @@ module.exports = grammar({
       $.tuple_pattern,
       $.list_pattern,
       $.dict_pattern,
-      $.struct_pattern,
+      // $.struct_pattern,
       $.placeholder,
     ),
 
@@ -117,42 +117,42 @@ module.exports = grammar({
       "}"
     ),
 
-    with_clause: $ => seq($.pattern, optional($.guard), "=", $.expression),
+    // with_clause: $ => seq($.pattern, optional($.guard), "=", $.expression),
 
-    _with_entry: $ => seq($.with_clause, $._terminator),
+    // _with_entry: $ => seq($.with_clause, $._terminator),
 
-    with_clauses: $ => seq(
-      "{",
-      optional($._terminator),
-      repeat($._with_entry),
-      $.with_clause,
-      optional($._terminator),
-      "}",
-    ), 
+    // with_clauses: $ => seq(
+    //   "{",
+    //   optional($._terminator),
+    //   repeat($._with_entry),
+    //   $.with_clause,
+    //   optional($._terminator),
+    //   "}",
+    // ), 
 
-    with: $ => prec.left(1, seq(
-      "with", 
-      choice($.with_clause, $.with_clauses),
-      optional($.with_then)
-    )),
+    // with: $ => prec.left(1, seq(
+    //   "with", 
+    //   choice($.with_clause, $.with_clauses),
+    //   optional($.with_then)
+    // )),
 
-    with_then: $ => prec.left(1, seq(
-      optional(repeat("\n")),
-      "then",
-      $.expression,
-      optional($.with_else)
-    )),
+    // with_then: $ => prec.left(1, seq(
+    //   optional(repeat("\n")),
+    //   "then",
+    //   $.expression,
+    //   optional($.with_else)
+    // )),
 
-    with_else: $ => seq(
-      optional(repeat("\n")),
-      "else",
-      "{",
-      optional($._terminator),
-      repeat($._match_entry),
-      $.match_clause,
-      optional($._terminator),
-      "}"   
-    ),
+    // with_else: $ => seq(
+    //   optional(repeat("\n")),
+    //   "else",
+    //   "{",
+    //   optional($._terminator),
+    //   repeat($._match_entry),
+    //   $.match_clause,
+    //   optional($._terminator),
+    //   "}"   
+    // ),
 
     // receive: $ => seq(
     //   "receive",
@@ -200,22 +200,25 @@ module.exports = grammar({
       "}"
     ),
 
-    struct_pattern: $ => seq(
-      "@{",
-      optional($._separator),
-      repeat($._assoc_entry),
-      optional(choice($.assoc_pattern, $.splat)),
-      optional($._separator),
-      "}"
-    ),
+    // struct_pattern: $ => seq(
+    //   "@{",
+    //   optional($._separator),
+    //   repeat($._assoc_entry),
+    //   optional(choice($.assoc_pattern, $.splat)),
+    //   optional($._separator),
+    //   "}"
+    // ),
 
     fn: $ => choice(
+      $.declaration,
       $.lambda,
       $.named, 
       $.composite
     ),
 
     fn_clause: $ => seq($.tuple_pattern, "->", $.expression),
+
+    declaration: $ => seq("fn", $.name),
 
     lambda: $ => seq("fn", $.fn_clause),
 
@@ -239,9 +242,9 @@ module.exports = grammar({
 
     block: $ => seq("{", repeat1($._block_line), "}"),
 
-    ref: $ => seq("ref", $.name, "=", $.expression),
+    box: $ => seq("box", $.name, "=", $.expression),
 
-    do: $ => prec.left(1, seq("do", $.expression, repeat1(seq(optional(repeat("\n")), ">", $.expression)))),
+    do: $ => prec.left(1, seq("do", $.expression, repeat1(seq(">", optional(repeat("\n")), $.expression)))),
 
     loop: $ => seq(
       "loop",
@@ -283,6 +286,7 @@ module.exports = grammar({
 
     reserved: $ => prec(-1, choice(
           "as",
+          "box",
           "do",
           "else",
           "false",
@@ -293,12 +297,11 @@ module.exports = grammar({
           "let",
           "loop",
           "nil",
-          "ns",
+          "pkg",
           //"receive",
           "recur",
-          "ref",
           //"send",
-          "spawn",
+          // "spawn",
           "then",
           "true",
           "when",
@@ -337,7 +340,7 @@ module.exports = grammar({
     _collection: $ => choice(
       $.tuple,
       $.dict,
-      $.struct,
+      // $.struct,
       $.list,
       $.set,
     ),
@@ -398,17 +401,17 @@ module.exports = grammar({
 
     assoc: $ => seq($.keyword, $.expression),
 
-    struct: $ => seq(
-      "@{",
-      optional($._separator),
-      repeat($._struct_entry),
-      optional($._struct_term),
-      optional($._separator),
-      "}",
-    ),
+    // struct: $ => seq(
+    //   "@{",
+    //   optional($._separator),
+    //   repeat($._struct_entry),
+    //   optional($._struct_term),
+    //   optional($._separator),
+    //   "}",
+    // ),
 
-    ns: $ => seq(
-      "ns", $.name, "{",
+    pkg: $ => seq(
+      "pkg", $.name, "{",
       optional($._separator),
       repeat($._struct_entry),
       optional($._struct_term),

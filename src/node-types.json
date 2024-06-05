@@ -76,6 +76,25 @@
     }
   },
   {
+    "type": "box",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        },
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "complex_loop_body",
     "named": true,
     "fields": {},
@@ -152,6 +171,21 @@
     }
   },
   {
+    "type": "declaration",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "dict",
     "named": true,
     "fields": {},
@@ -221,6 +255,10 @@
           "named": true
         },
         {
+          "type": "box",
+          "named": true
+        },
+        {
           "type": "dict",
           "named": true
         },
@@ -261,19 +299,7 @@
           "named": true
         },
         {
-          "type": "ref",
-          "named": true
-        },
-        {
           "type": "set",
-          "named": true
-        },
-        {
-          "type": "spawn",
-          "named": true
-        },
-        {
-          "type": "struct",
           "named": true
         },
         {
@@ -286,10 +312,6 @@
         },
         {
           "type": "when",
-          "named": true
-        },
-        {
-          "type": "with",
           "named": true
         }
       ]
@@ -310,6 +332,10 @@
       "types": [
         {
           "type": "composite",
+          "named": true
+        },
+        {
+          "type": "declaration",
           "named": true
         },
         {
@@ -637,25 +663,6 @@
     "fields": {}
   },
   {
-    "type": "ns",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "assoc",
-          "named": true
-        },
-        {
-          "type": "name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "pattern",
     "named": true,
     "fields": {},
@@ -684,15 +691,30 @@
           "named": true
         },
         {
-          "type": "struct_pattern",
-          "named": true
-        },
-        {
           "type": "tuple_pattern",
           "named": true
         },
         {
           "type": "typed",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "pkg",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "assoc",
+          "named": true
+        },
+        {
+          "type": "name",
           "named": true
         }
       ]
@@ -708,25 +730,6 @@
       "types": [
         {
           "type": "tuple",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "ref",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "expression",
-          "named": true
-        },
-        {
-          "type": "name",
           "named": true
         }
       ]
@@ -773,22 +776,7 @@
           "named": true
         },
         {
-          "type": "ns",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "spawn",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "expression",
+          "type": "pkg",
           "named": true
         }
       ]
@@ -813,44 +801,6 @@
     "type": "string",
     "named": true,
     "fields": {}
-  },
-  {
-    "type": "struct",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "assoc",
-          "named": true
-        },
-        {
-          "type": "name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "struct_pattern",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "assoc_pattern",
-          "named": true
-        },
-        {
-          "type": "splat",
-          "named": true
-        }
-      ]
-    }
   },
   {
     "type": "synth_root",
@@ -983,101 +933,6 @@
     }
   },
   {
-    "type": "with",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "with_clause",
-          "named": true
-        },
-        {
-          "type": "with_clauses",
-          "named": true
-        },
-        {
-          "type": "with_then",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "with_clause",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "expression",
-          "named": true
-        },
-        {
-          "type": "guard",
-          "named": true
-        },
-        {
-          "type": "pattern",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "with_clauses",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "with_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "with_else",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "match_clause",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "with_then",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "expression",
-          "named": true
-        },
-        {
-          "type": "with_else",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "\n",
     "named": false
   },
@@ -1126,10 +981,6 @@
     "named": false
   },
   {
-    "type": "@{",
-    "named": false
-  },
-  {
     "type": "[",
     "named": false
   },
@@ -1139,6 +990,10 @@
   },
   {
     "type": "as",
+    "named": false
+  },
+  {
+    "type": "box",
     "named": false
   },
   {
@@ -1198,12 +1053,12 @@
     "named": false
   },
   {
-    "type": "ns",
-    "named": false
-  },
-  {
     "type": "number",
     "named": true
+  },
+  {
+    "type": "pkg",
+    "named": false
   },
   {
     "type": "placeholder",
@@ -1211,10 +1066,6 @@
   },
   {
     "type": "recur",
-    "named": false
-  },
-  {
-    "type": "ref",
     "named": false
   },
   {
